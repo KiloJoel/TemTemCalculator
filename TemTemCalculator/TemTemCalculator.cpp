@@ -113,7 +113,7 @@ int main()
     int tvsAvailable = 901;
     int step = 1;
 
-    float lowestTankinessMetric = 9999999.f;
+    float bestTankinessMetric = 9999999.f;
     Stats statsAtLowestTankiness = Stats();
     Stats tvsAtLowestTankiness = Stats();
 
@@ -126,14 +126,14 @@ int main()
             Stats temStats(calculateStats(baseStats, tvs, svs));
 
             float tankinessMetric = calculateEffectiveHp(temStats);
-            if (tankinessMetric < lowestTankinessMetric)
+            if (tankinessMetric < bestTankinessMetric)
             {
-                lowestTankinessMetric = tankinessMetric;
+                bestTankinessMetric = tankinessMetric;
                 statsAtLowestTankiness = temStats;
                 tvsAtLowestTankiness = tvs;
             }
         }
     }
 
-    std::cout << "Lowest tankiness metric: " << lowestTankinessMetric << "\nstats: " << statsAtLowestTankiness.createString() << "\nTVs: " << tvsAtLowestTankiness.createString() << "\n";
+    std::cout << "Best tankiness metric: " << bestTankinessMetric << "\nstats: " << statsAtLowestTankiness.createString() << "\nTVs: " << tvsAtLowestTankiness.createString() << "\n";
 }
