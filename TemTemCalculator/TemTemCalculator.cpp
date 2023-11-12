@@ -100,22 +100,23 @@ Stats calculateStats(Stats baseStats, Stats tvs, Stats svs = Stats(50))
     );
 }
 
-float calculateEffectiveHp(Stats temStats)
+float calculateTankinessMetric(Stats temStats)
 {
-    return  (1.f / temStats.defence + 1.f / temStats.specialDefence) / (float)temStats.hitpoints;
+    return (1.f / temStats.defence + 1.f / temStats.specialDefence) / (float)temStats.hitpoints;
 }
 
 int main()
 {
-    Stats baseStats = Stats(77, 52, 66, 84, 77, 36, 51);
+    // Input values
+    Stats baseStats(77, 52, 66, 84, 77, 36, 51);
     Stats svs(50, 50, 50, 50, 50, 50, 50);
+    int tvsAvailable(901);
 
-    int tvsAvailable = 901;
-    int step = 1;
+    int step(1);
 
-    float bestTankinessMetric = 9999999.f;
-    Stats statsAtLowestTankiness = Stats();
-    Stats tvsAtLowestTankiness = Stats();
+    float bestTankinessMetric(9999999.f);
+    Stats statsAtBestTankiness = Stats();
+    Stats tvsAtBestTankiness = Stats();
 
     for (int hp = 0; hp < std::min(tvsAvailable, 500); hp += step)
     {
@@ -125,15 +126,15 @@ int main()
             Stats tvs(hp, 0, 0, 0, defence, 0, tvsAvailableAfterHp - defence);
             Stats temStats(calculateStats(baseStats, tvs, svs));
 
-            float tankinessMetric = calculateEffectiveHp(temStats);
+            float tankinessMetric = calculateTankinessMetric(temStats);
             if (tankinessMetric < bestTankinessMetric)
             {
                 bestTankinessMetric = tankinessMetric;
-                statsAtLowestTankiness = temStats;
-                tvsAtLowestTankiness = tvs;
+                statsAtBestTankiness = temStats;
+                tvsAtBestTankiness = tvs;
             }
         }
     }
 
-    std::cout << "Best tankiness metric: " << bestTankinessMetric << "\nstats: " << statsAtLowestTankiness.createString() << "\nTVs: " << tvsAtLowestTankiness.createString() << "\n";
+    std::cout << "Best tankiness metric: " << bestTankinessMetric << "\nstats: " << statsAtBestTankiness.createString() << "\nTVs: " << tvsAtBestTankiness.createString() << "\n";
 }
