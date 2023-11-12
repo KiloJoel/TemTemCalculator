@@ -14,14 +14,14 @@ struct Stats
         , specialDefence(0)
     {}
 
-    Stats(int invalueForAll)
-        : hitpoints(invalueForAll)
-        , stamina(invalueForAll)
-        , speed(invalueForAll)
-        , attack(invalueForAll)
-        , defence(invalueForAll)
-        , specialAttack(invalueForAll)
-        , specialDefence(invalueForAll)
+    Stats(int inValueForAll)
+        : hitpoints(inValueForAll)
+        , stamina(inValueForAll)
+        , speed(inValueForAll)
+        , attack(inValueForAll)
+        , defence(inValueForAll)
+        , specialAttack(inValueForAll)
+        , specialDefence(inValueForAll)
     {}
 
     Stats(int inHitpoints, int inStamina, int inSpeed, int inAttack, int inDefence, int inSpecialAttack, int inSpecialDefence)
