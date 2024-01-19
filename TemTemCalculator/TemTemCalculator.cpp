@@ -1,6 +1,10 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <vector>
+#include <array>
 #include <string>
+#include <algorithm>
 
 struct Stats
 {
@@ -32,6 +36,16 @@ struct Stats
         , defence(inDefence)
         , specialAttack(inSpecialAttack)
         , specialDefence(inSpecialDefence)
+    {}
+
+    Stats(std::array<int, 7> statsArray)
+        : hitpoints(statsArray.at(0))
+        , stamina(statsArray.at(1))
+        , speed(statsArray.at(2))
+        , attack(statsArray.at(3))
+        , defence(statsArray.at(4))
+        , specialAttack(statsArray.at(5))
+        , specialDefence(statsArray.at(6))
     {}
 
     std::string createString()
@@ -105,23 +119,94 @@ float calculateTankinessMetric(Stats temStats)
     return (1.f / temStats.defence + 1.f / temStats.specialDefence) / (float)temStats.hitpoints;
 }
 
+std::vector<std::vector<std::string>> parseCSV()
+{
+    std::ifstream data("Temtem stuff - TemData.csv");
+    std::string line;
+    std::vector<std::vector<std::string>> parsedCsv;
+    while (std::getline(data, line))
+    {
+        std::stringstream lineStream(line);
+        std::string cell;
+        std::vector<std::string> parsedRow;
+        while (std::getline(lineStream, cell, ','))
+        {
+            parsedRow.push_back(cell);
+        }
+
+        parsedCsv.push_back(parsedRow);
+    }
+
+    return parsedCsv;
+};
+
+std::string stringToLowercase(std::string string)
+{
+    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    return string;
+}
+
+Stats dataRowToStats(std::vector<std::string> row)
+{
+    std::array<int, 7> statsArray;
+    std::transform(row.begin() + 4, row.begin() + 11, statsArray.begin(), [](std::string statString)
+        {
+            return std::stoi(statString);
+        });
+    return Stats(statsArray);
+}
+
+void pauseConsole()
+{
+    std::string dummyString;
+    std::cin >> dummyString;
+}
+
 int main()
 {
-    // Input values
-    Stats baseStats(77, 52, 66, 84, 77, 36, 51);
-    Stats svs(50, 50, 50, 50, 50, 50, 50);
-    int tvsAvailable(901);
+    std::vector<std::vector<std::string>> temStats = parseCSV();
 
+    std::string temName;
+    int tvsAvailable;
+
+    std::cout << "Tem Name: ";
+    std::cin >> temName;
+
+    std::vector<std::string> foundRow;
+    std::for_each(temStats.begin(), temStats.end(), [temName, &foundRow](std::vector<std::string> row)
+    {
+        // Check if the tem name in this row contains the input string
+        if (stringToLowercase(row.at(1)).find(stringToLowercase(temName)) != std::string::npos)
+            foundRow = row;
+    });
+
+    if (foundRow.size() == 0)
+    {
+        std::cout << "Error: Tem not found\n";
+        pauseConsole();
+        return 0;
+    }
+
+    std::cout << "Found " << foundRow.at(1) << "\n";
+
+    Stats baseStats = dataRowToStats(foundRow);
+
+    std::cout << "TVs Available: ";
+    std::cin >> tvsAvailable;
+
+    Stats svs(50, 50, 50, 50, 50, 50, 50);
     int step(1);
 
     float bestTankinessMetric(9999999.f);
     Stats statsAtBestTankiness = Stats();
     Stats tvsAtBestTankiness = Stats();
 
-    for (int hp = 0; hp < std::min(tvsAvailable, 500); hp += step)
+    // Loop through all possible combinations of hp, defence, and special defence, and calculate a tankiness metric for each
+    for (int hp = 0; hp <= std::min(tvsAvailable, 500); hp += step)
     {
         int tvsAvailableAfterHp = tvsAvailable - hp;
-        for (int defence = 0; defence < tvsAvailableAfterHp; defence += step)
+        for (int defence = 0; defence <= tvsAvailableAfterHp; defence += step)
         {
             Stats tvs(hp, 0, 0, 0, defence, 0, tvsAvailableAfterHp - defence);
             Stats temStats(calculateStats(baseStats, tvs, svs));
@@ -136,5 +221,6 @@ int main()
         }
     }
 
-    std::cout << "Best tankiness metric: " << bestTankinessMetric << "\nstats: " << statsAtBestTankiness.createString() << "\nTVs: " << tvsAtBestTankiness.createString() << "\n";
+    std::cout << "\nBest tankiness metric: " << bestTankinessMetric << "\nstats: " << statsAtBestTankiness.createString() << "\nTVs: " << tvsAtBestTankiness.createString() << "\n";
+    pauseConsole();
 }
